@@ -1,0 +1,14 @@
+services:
+  mysql:
+    image: mysql:9.4
+    container_name: mysql_komodo
+    environment:
+      MYSQL_ROOT_PASSWORD: 1186023DEHG
+      MYSQL_DATABASE: KomodoDB
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    restart: always
+volumes:
+  mysql_data:
