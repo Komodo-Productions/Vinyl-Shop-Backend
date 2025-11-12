@@ -97,6 +97,7 @@ jobs:
             --cluster "${CLUSTER_NAME}" \
             --service "${SERVICE_NAME}" \
             --task-definition "$NEW_TD_ARN" \
+            --force-new-deployment
       
       
       - name: Debug ECS service failure
