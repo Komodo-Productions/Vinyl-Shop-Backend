@@ -1,6 +1,5 @@
 // db.js
 const knex = require("knex");
-require("dotenv").config();
 
 const db = knex({
     client: "mysql2",
