@@ -8,10 +8,12 @@ describe('AuthController', () => {
   let req, res;
 
   beforeEach(() => {
-    req = { body: {} };
+    req = { body: {}, params: {}, query: {} };
     res = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
+      // <-- Aquí está la corrección: mockeamos cookie y lo hacemos chainable
+      cookie: jest.fn().mockReturnThis(),
     };
     jest.clearAllMocks();
   });
@@ -32,6 +34,7 @@ describe('AuthController', () => {
       await login(req, res);
 
       expect(AuthService.loginUser).toHaveBeenCalledWith('john@example.com', '12345');
+      expect(res.cookie).toHaveBeenCalledWith('token', mockToken, expect.any(Object));
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({
         success: true,
