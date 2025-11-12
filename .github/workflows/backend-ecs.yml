@@ -101,51 +101,51 @@ jobs:
       
       
       - name: Debug ECS service failure
-    if: failure()
-    run: |
-      echo "=== Debugging ECS service failure ==="
-      echo "Mostrando últimas tareas del servicio..."
+        if: failure()
+        run: |
+          echo "=== Debugging ECS service failure ==="
+          echo "Mostrando últimas tareas del servicio..."
 
-      TASK_ARN=$(aws ecs list-tasks \
-        --cluster "${CLUSTER_NAME}" \
-        --service-name "${SERVICE_NAME}" \
-        --desired-status STOPPED \
-        --max-items 1 \
-        --query 'taskArns[0]' \
-        --output text)
+          TASK_ARN=$(aws ecs list-tasks \
+            --cluster "${CLUSTER_NAME}" \
+            --service-name "${SERVICE_NAME}" \
+            --desired-status STOPPED \
+            --max-items 1 \
+            --query 'taskArns[0]' \
+            --output text)
 
-      if [ "$TASK_ARN" = "None" ] || [ -z "$TASK_ARN" ]; then
-        echo "No se encontró ninguna tarea detenida."
-        exit 1
-      fi
+          if [ "$TASK_ARN" = "None" ] || [ -z "$TASK_ARN" ]; then
+            echo "No se encontró ninguna tarea detenida."
+            exit 1
+          fi
 
-      echo "Última tarea fallida: $TASK_ARN"
+          echo "Última tarea fallida: $TASK_ARN"
 
-      echo "Mostrando descripción de la tarea..."
-      aws ecs describe-tasks \
-        --cluster "${CLUSTER_NAME}" \
-        --tasks "$TASK_ARN" \
-        --query "tasks[0].containers[*].{Name:name,ExitCode:exitCode,Reason:reason,LastStatus:lastStatus}" \
-        --output table
+          echo "Mostrando descripción de la tarea..."
+          aws ecs describe-tasks \
+            --cluster "${CLUSTER_NAME}" \
+            --tasks "$TASK_ARN" \
+            --query "tasks[0].containers[*].{Name:name,ExitCode:exitCode,Reason:reason,LastStatus:lastStatus}" \
+            --output table
 
-      echo "=== Intentando obtener logs ==="
-      LOG_GROUP=$(aws ecs describe-tasks \
-        --cluster "${CLUSTER_NAME}" \
-        --tasks "$TASK_ARN" \
-        --query "tasks[0].containers[0].logConfiguration.options.\"awslogs-group\"" \
-        --output text)
-      LOG_STREAM=$(aws ecs describe-tasks \
-        --cluster "${CLUSTER_NAME}" \
-        --tasks "$TASK_ARN" \
-        --query "tasks[0].containers[0].logConfiguration.options.\"awslogs-stream-prefix\"" \
-        --output text)
+          echo "=== Intentando obtener logs ==="
+          LOG_GROUP=$(aws ecs describe-tasks \
+            --cluster "${CLUSTER_NAME}" \
+            --tasks "$TASK_ARN" \
+            --query "tasks[0].containers[0].logConfiguration.options.\"awslogs-group\"" \
+            --output text)
+          LOG_STREAM=$(aws ecs describe-tasks \
+            --cluster "${CLUSTER_NAME}" \
+            --tasks "$TASK_ARN" \
+            --query "tasks[0].containers[0].logConfiguration.options.\"awslogs-stream-prefix\"" \
+            --output text)
 
-      if [ "$LOG_GROUP" != "None" ]; then
-        echo "Obteniendo últimos logs de CloudWatch..."
-        aws logs tail "$LOG_GROUP" --since 10m --no-follow || true
-      else
-        echo "No se pudo determinar el log group automáticamente."
-      fi
+          if [ "$LOG_GROUP" != "None" ]; then
+            echo "Obteniendo últimos logs de CloudWatch..."
+            aws logs tail "$LOG_GROUP" --since 10m --no-follow || true
+          else
+            echo "No se pudo determinar el log group automáticamente."
+          fi
       
 
       - name: Wait for service stable
