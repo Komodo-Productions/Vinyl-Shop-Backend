@@ -1,0 +1,43 @@
+name: Pull Request Checks
+
+on:
+  pull_request:
+    branches:
+      - main
+    types: [opened, labeled, unlabeled, synchronize]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+          cache: npm
+
+      - name: Install modules
+        run: npm install
+
+      - name: Run linter
+        run: npm run lint
+
+      - name: Run tests with coverage
+        run: npm run test -- --coverage --maxWorkers=2
+
+      - name: Enforce coverage threshold
+        run: |
+          npx jest --coverage --maxWorkers=2 --coverageThreshold='{"global":{"branches":80,"functions":80,"lines":80,"statements":80}}'
+
+  block-merge:
+    runs-on: ubuntu-latest
+    if: contains(github.event.pull_request.labels.*.name, 'do not merge')
+    steps:
+      - name: Fail if PR is labeled with 'do not merge'
+        run: |
+          echo "❌ This PR is blocked from merging due to the 'do not merge' label."
+          exit 1
