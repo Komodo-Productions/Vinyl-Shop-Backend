@@ -98,8 +98,13 @@ jobs:
             --service "${SERVICE_NAME}" \
             --task-definition "$NEW_TD_ARN" \
             --force-new-deployment
-      
-      
+
+      - name: Wait for service stable
+        run: |
+          aws ecs wait services-stable \
+            --cluster "${CLUSTER_NAME}" \
+            --services "${SERVICE_NAME}"
+
       - name: Debug ECS service failure
         if: failure()
         run: |
@@ -146,13 +151,6 @@ jobs:
           else
             echo "No se pudo determinar el log group automáticamente."
           fi
-      
-
-      - name: Wait for service stable
-        run: |
-          aws ecs wait services-stable \
-            --cluster "${CLUSTER_NAME}" \
-            --services "${SERVICE_NAME}"
 
       - name: Get Backend Security Group from CloudFormation outputs
         run: |
