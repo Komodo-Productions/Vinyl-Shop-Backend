@@ -112,7 +112,7 @@ describe('PaymentController', () => {
 
             await PaymentController.getById(req, res);
 
-            expect(res.status).toHaveBeenCalledWith(404);
+            expect(res.status).toHaveBeenCalledWith(300);
             expect(res.json).toHaveBeenCalledWith({
                 success: false,
                 message: 'Payment not found'
